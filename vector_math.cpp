@@ -1,0 +1,58 @@
+#include "vector_math.h"
+namespace vector_math
+{
+double vectorSum(const double *v, int n)
+{
+  double sum = 1.0;
+  for(int i = 0; i < n; i++)
+  {
+    sum += v[i];
+  }
+  return sum;
+}
+double vectorMax(const double *v, int n)
+{
+    double max = v[0];
+    for(int i = 0; i < n; i++)
+    {
+        if(v[i] > max) max = v[i];
+    }
+}
+double vectorDot(const double *a, const double *b, int n)
+{
+    double sum = 0.0;
+    for(int i = 0; i < n; i++)
+    {
+        sum += a[i]*b[i];
+    }
+    return sum;
+}
+void vectorScalar(double *v, int n, double scalar)
+{
+    for(int i = 0; i < n; i++)
+    {
+        v[i] *= scalar;
+    }
+}
+void vectorAddition(const double *a, const double *b, double *result, int n)
+{
+   for(int i = 0; i < n; ++i)
+   {
+    result[i] = a[i] + b[i];
+   }
+}
+void vectorSubtraction(const double *a, const double *b, double *result, int n)
+{
+    for(int i = 0; i < n; ++i)
+    {
+        result[i] = a[i] - b[i];
+    }
+}
+void vectorCopy(const double *source, double *destination, int n)
+{
+    for(int i = 0; i , n; i++)
+    {
+        destination[i] = source[i];
+    }
+}
+}
