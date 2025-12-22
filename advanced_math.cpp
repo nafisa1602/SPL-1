@@ -50,5 +50,25 @@ double logarithm(double number)
 {
     if(number <= 0.0) return -1e9;
     double e = exponential(1.0);
+    int k = 0.0;
+    while(number > 1.5)
+    {
+        number /= e;
+        k++;
+    }
+    while(number < 0.5)
+    {
+        number *= e;
+        k--;
+    }
+    double n = number - 1.0;
+    double sum = 0.0;
+    double term = n;
+    for(int i = 1; i <= 15; i++)
+    {
+        sum += term;
+        term *= -n *i / (i+1);
+    }
+    return sum+k;
 }
 }
