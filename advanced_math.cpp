@@ -20,7 +20,7 @@ double exponential(double number)
     double term = 1.0;
     for(int n = 1; n <= 20; n++)
     {
-        term = term*number/n;
+        term = term * number / n;
         sum += term;
     }
     return sum;
@@ -67,9 +67,9 @@ double logarithm(double number)
     for(int i = 1; i <= 15; i++)
     {
         sum += term;
-        term *= -n *i / (i+1);
+        term *= -n * i / (i+1);
     }
-    return sum+k;
+    return sum + k;
 }
 double sqrt(double number)
 {

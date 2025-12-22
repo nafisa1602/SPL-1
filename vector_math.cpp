@@ -17,13 +17,14 @@ double vectorMax(const double *v, int n)
     {
         if(v[i] > max) max = v[i];
     }
+    return max;
 }
 double vectorDot(const double *a, const double *b, int n)
 {
     double sum = 0.0;
     for(int i = 0; i < n; i++)
     {
-        sum += a[i]*b[i];
+        sum += a[i] * b[i];
     }
     return sum;
 }
@@ -71,11 +72,7 @@ void vectorFill(double *v, int n, double value)
 }
 void softMax(const double *input, double *output, int n)
 {
-    double maxValue = input[0];
-    for(int i = 1; i < n; i++)
-    {
-        if(input[i] > maxValue) maxValue = input[i];
-    }
+    double maxValue = vectorMax(input, n);
     double sum = 0.0;
     for(int i = 0; i < n; i++)
     {
@@ -83,15 +80,13 @@ void softMax(const double *input, double *output, int n)
         sum += output[i];
     }
     for(int i = 0; i < n; i++) 
-    output[i] /= sum;
+    {
+        output[i] /= sum;
+    }
 }
 void logSoftMax(const double *input, double *output, int n)
 {
-    double maxValue = input[0];
-    for(int i = 1; i < n; i++)
-    {
-        if(input[i] > maxValue) maxValue = input[i];
-    }
+    double maxValue = vectorMax(input, n);
     double sum = 0.0;
     for(int i = 0; i < n; i++)
     {
@@ -99,6 +94,8 @@ void logSoftMax(const double *input, double *output, int n)
     }
     double logSum = advanced_math::logarithm(sum);
     for(int i = 0; i < n; i++) 
-    output[i] = input[i] - maxValue - logSum;
+    {
+        output[i] = input[i] - maxValue - logSum;
+    }
 }
 }

@@ -20,7 +20,7 @@ long double factorial(double number)
 {
     if(number < 0.0) return 0.0L;
     long double result = 1.0L;
-    for(int i = 2; i <= number; i++)
+    for(int i = 2; i <= (int)number; i++)
     {
         result *= i;
     }
@@ -29,7 +29,7 @@ long double factorial(double number)
 double power(double base, int exponent)
 {
     if(exponent == 0) return 1.0;
-    else if(exponent < 0) return 1.0/power(base, -exponent);
+    else if(exponent < 0) return 1.0 / power(base, -exponent);
     double result = 1.0;
     while(exponent > 0)
     {
