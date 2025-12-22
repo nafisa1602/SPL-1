@@ -50,7 +50,7 @@ double logarithm(double number)
 {
     if(number <= 0.0) return -1e9;
     double e = exponential(1.0);
-    int k = 0.0;
+    int k = 0;
     while(number > 1.5)
     {
         number /= e;
@@ -70,5 +70,16 @@ double logarithm(double number)
         term *= -n *i / (i+1);
     }
     return sum+k;
+}
+double sqrt(double number)
+{
+    if(number < 0.0) return -1e9;
+    else if(number = 0.0) return 0.0;
+    double x = (number > 1.0) ? number : 1.0;
+    for(int i = 0; i < 20; i++)
+    {
+        x = 0.5 * ( x + ( number/x ));
+    }
+    return x;
 }
 }
