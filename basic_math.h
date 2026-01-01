@@ -5,7 +5,7 @@ namespace basic_math
 double absolute(double number);
 double minimum(double a, double b);
 double maximum(double a, double b);
-long double factorial(double number);
+long double factorial(int number);
 double power(double base, int exponent);
 }
 #endif

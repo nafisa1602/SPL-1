@@ -7,6 +7,6 @@ double exponential(double number);
 double sigmoid(double number);
 double tanh(double number);
 double logarithm(double number);
-double sqrt(double number);
+double sqaureRoot(double number);
 }
 #endif

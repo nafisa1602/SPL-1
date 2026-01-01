@@ -71,10 +71,10 @@ double logarithm(double number)
     }
     return sum + k;
 }
-double sqrt(double number)
+double squareRoot(double number)
 {
     if(number < 0.0) return -1e9;
-    else if(number = 0.0) return 0.0;
+    else if(number == 0.0) return 0.0;
     double x = (number > 1.0) ? number : 1.0;
     for(int i = 0; i < 20; i++)
     {

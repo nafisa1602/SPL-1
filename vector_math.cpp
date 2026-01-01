@@ -3,7 +3,7 @@ namespace vector_math
 {
 double vectorSum(const double *v, int n)
 {
-  double sum = 1.0;
+  double sum = 0.0;
   for(int i = 0; i < n; i++)
   {
     sum += v[i];
@@ -37,6 +37,7 @@ void vectorScalar(double *v, int n, double scalar)
 }
 void vectorScalarDivide(double *v, int n, double scalar)
 {
+    if(scalar == 0.0) return;
     for(int i = 0; i < n; i++)
     {
         v[i] /= scalar;
@@ -58,7 +59,7 @@ void vectorSubtraction(const double *a, const double *b, double *result, int n)
 }
 void vectorCopy(const double *source, double *destination, int n)
 {
-    for(int i = 0; i , n; i++)
+    for(int i = 0; i < n; i++)
     {
         destination[i] = source[i];
     }

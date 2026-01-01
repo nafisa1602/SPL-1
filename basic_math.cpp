@@ -16,9 +16,9 @@ double  maximum(double a, double b)
     if(a > b) return a;
     return b;
 }
-long double factorial(double number)
+long double factorial(int number)
 {
-    if(number < 0.0) return 0.0L;
+    if(number < 0) return 0.0L;
     long double result = 1.0L;
     for(int i = 2; i <= (int)number; i++)
     {
