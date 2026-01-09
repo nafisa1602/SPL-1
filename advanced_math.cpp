@@ -39,12 +39,32 @@ double sigmoid(double number)
         return 1.0 / (1.0 + x);
     }
 }
+double sigmoidDeriv(double number)
+{
+    double value = sigmoid(number);
+    return value * (1 - value);
+}
 double tanh(double number)
 {
    number = clamp(number, -20.0, 20.0);
    double posExpo = exponential(number);
    double negExpo = exponential(-number);
    return (posExpo - negExpo) / (posExpo + negExpo);
+}
+double tanhDeriv(double number)
+{
+    double value = tanh(number);
+    return 1 - (value * value);
+}
+double reLu(double number)
+{
+    if(number > 0.0) return number;
+    return 0.0;
+}
+double reLuDeriv(double number)
+{
+   if(number > 0.0) return 1.0;
+   return 0.0; 
 }
 double logarithm(double number)
 {
