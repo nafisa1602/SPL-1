@@ -45,20 +45,20 @@ void dense::denseLayer::forward(const double *input, double *output)
 }
 void dense::denseLayer::backward(const double *denseOutput, double *denseInput, double learningRate)
 {
-    for (int i = 0; i < inputSize; i++)
+    for(int i = 0; i < inputSize; i++)
     {
-        inputCache[i] = denseInput[i];
-    } 
+        denseInput[i] = 0.0;
+    }
+
     for(int j = 0; j < outputSize; j++)
     {
-        for (int i = 0; i < inputSize; i++)
-    {
-        int index = j * inputSize + i;
-        double denseWeight = denseOutput[j] * inputCache[i];
+        for(int i = 0; i < inputSize; i++)
+        {
+            int index = j * inputSize + i;
             denseInput[i] += weight[index] * denseOutput[j];
-
+            double denseWeight = denseOutput[j] * inputCache[i];
             weight[index] -= learningRate * denseWeight;
-    } 
-    bias[j] -= learningRate * denseOutput[j];
+        }
+        bias[j] -= learningRate * denseOutput[j];
     }
 }
