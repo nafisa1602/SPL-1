@@ -14,7 +14,7 @@ dense::denseLayer::denseLayer(int input, int output)
     inputCache = new double[input];
     for(int i = 0; i < input*output; i++)
     {
-        weight[i] = randomNumber() * 0.1 - 0.05; //weight initialize korsi
+        weight[i] = randomNumber() * 0.1 - 0.05; 
     }
     for(int i = 0; i < output; i++)
     {
