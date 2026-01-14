@@ -1,0 +1,10 @@
+dnscat2.example
+command.dnscat2.example
+control.dnscat2.example
+session.dnscat2.example
+iodine.example
+data.iodine.example
+login.iodine.example
+dns2tcp.example
+tunnel.dns2tcp.example
+exfil.dns2tcp.example

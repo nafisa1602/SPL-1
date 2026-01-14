@@ -1,7 +1,6 @@
 #include "cross_entropy.h"
 #include "vector_math.h"
 #include "advanced_math.h"
-
 namespace cross_entropy
 {
     double categoricalCrossEntropy(const double* yTrue, const double* yPredic, int numClasses)
