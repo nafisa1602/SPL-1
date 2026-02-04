@@ -11,7 +11,15 @@ void initLstmState(lstmState& s, int hiddenSize, int concatSize)
     for(int i = 0; i < hiddenSize; i++)
     {
         s.hidden[i] = 0.0;
-        s.cell[i]   = 0.0;
+        s.cell[i] = 0.0;
+        s.forget[i] = 0.0;
+        s.inputGate[i] = 0.0;
+        s.outputGate[i] = 0.0;
+        s.candidate[i] = 0.0;
+    }
+    for(int i = 0; i < concatSize; i++)
+    {
+        s.concat[i] = 0.0;
     }
 }
 void freeLstmState(lstmState& s)

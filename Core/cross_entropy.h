@@ -3,6 +3,7 @@
 namespace cross_entropy
 {
   double categoricalCrossEntropy(const double *yTrue, const double *yPredic, int numClasses);
+  double categoricalCrossEntropyLogits(const double *yTrue, const double *logits, int numClasses);
   void softmaxCrossEntroGrad(const double *logits, const double *yTrue, double *gradient, int numClasses);
 }
 #endif

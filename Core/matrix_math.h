@@ -8,7 +8,7 @@ void matrixCopy(const double *source, double *dest, int row, int column);
 void matrixPrint(const double *a, int row, int column);
 void matrixAdd(const double *a, const double *b, double *c, int row, int column);
 void matrixSubtract(const double *a, const double *b, double *c, int row, int column);
-void matrixScalarMultiply(const double *a, int row, int column, double scalar);
+void matrixScalarMultiply(double *a, int row, int column, double scalar);
 bool matrixMultiply(const double *a, const double *b, int rowA, int colA, int rowB, int colB, double *c);
 void matrixTranspose(const double *a, int row, int column, double *at);
 void matrixRowSum(const double *a, double *result, int row, int column);

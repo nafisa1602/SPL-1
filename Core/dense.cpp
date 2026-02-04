@@ -1,10 +1,6 @@
 #include"dense.h"
-static unsigned int number = 123456;
-static double randomNumber()
-{
-    number = number * 1103515245 + 12345;
-    return ((number / 65536) % 32768) / 32768.0;
-}
+#include"rng.h"
+
 dense::denseLayer::denseLayer(int input, int output)
 {
     inputSize = input;
@@ -14,7 +10,7 @@ dense::denseLayer::denseLayer(int input, int output)
     inputCache = new double[input];
     for(int i = 0; i < input*output; i++)
     {
-        weight[i] = randomNumber() * 0.1 - 0.05; 
+        weight[i] = rng::uniform(-0.05, 0.05); 
     }
     for(int i = 0; i < output; i++)
     {
