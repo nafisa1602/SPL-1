@@ -1,4 +1,4 @@
-#include <iostream>
+/*#include <iostream>
 #include <vector>
 #include "csv_loader.h"
 #include "lstm.h"
@@ -91,4 +91,4 @@ int main()
     }
     freeLstmState(state);
     return 0;
-}
+}*/

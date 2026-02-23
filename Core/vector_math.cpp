@@ -1,102 +1,104 @@
 #include "vector_math.h"
+#include "advanced_math.h"
+
+static inline int isNaN(double x) { return x != x; }
+static inline int badSum(double s) { return (!(s > 0.0)) || isNaN(s) || (s > 1e308); }
+
 namespace vector_math
 {
-double vectorSum(const double *v, int n)
-{
-  double sum = 0.0;
-  for(int i = 0; i < n; i++)
-  {
-    sum += v[i];
-  }
-  return sum;
-}
-double vectorMax(const double *v, int n)
-{
-    double max = v[0];
-    for(int i = 0; i < n; i++)
+    double vectorSum(const double *v, int n)
     {
-        if(v[i] > max) max = v[i];
+        double sum = 0.0;
+        for(int i = 0; i < n; i++) sum += v[i];
+        return sum;
     }
-    return max;
-}
-double vectorDot(const double *a, const double *b, int n)
-{
-    double sum = 0.0;
-    for(int i = 0; i < n; i++)
+
+    double vectorMax(const double *v, int n)
     {
-        sum += a[i] * b[i];
+        double m = v[0];
+        for(int i = 1; i < n; i++)
+            if(v[i] > m) m = v[i];
+        return m;
     }
-    return sum;
-}
-void vectorScalar(double *v, int n, double scalar)
-{
-    for(int i = 0; i < n; i++)
+
+    double vectorDot(const double *a, const double *b, int n)
     {
-        v[i] *= scalar;
+        double sum = 0.0;
+        for(int i = 0; i < n; i++) sum += a[i] * b[i];
+        return sum;
     }
-}
-void vectorScalarDivide(double *v, int n, double scalar)
-{
-    if(scalar == 0.0) return;
-    for(int i = 0; i < n; i++)
+
+    void vectorScalar(double *v, int n, double scalar)
     {
-        v[i] /= scalar;
+        for(int i = 0; i < n; i++) v[i] *= scalar;
     }
-}
-void vectorAddition(const double *a, const double *b, double *result, int n)
-{
-   for(int i = 0; i < n; ++i)
-   {
-    result[i] = a[i] + b[i];
-   }
-}
-void vectorSubtraction(const double *a, const double *b, double *result, int n)
-{
-    for(int i = 0; i < n; ++i)
+
+    void vectorScalarDivide(double *v, int n, double scalar)
     {
-        result[i] = a[i] - b[i];
+        if(scalar == 0.0) return;
+        for(int i = 0; i < n; i++) v[i] /= scalar;
     }
-}
-void vectorCopy(const double *source, double *destination, int n)
-{
-    for(int i = 0; i < n; i++)
+
+    void vectorAddition(const double *a, const double *b, double *result, int n)
     {
-        destination[i] = source[i];
+        for(int i = 0; i < n; i++) result[i] = a[i] + b[i];
     }
-}
-void vectorFill(double *v, int n, double value)
-{
-    for (int i = 0; i < n; i++)
+
+    void vectorSubtraction(const double *a, const double *b, double *result, int n)
     {
-        v[i] = value;
+        for(int i = 0; i < n; i++) result[i] = a[i] - b[i];
     }
-}
-void softMax(const double *input, double *output, int n)
-{
-    double maxValue = vectorMax(input, n);
-    double sum = 0.0;
-    for(int i = 0; i < n; i++)
+
+    void vectorCopy(const double *source, double *destination, int n)
     {
-        output[i] = advanced_math::exponential(input[i] - maxValue);
-        sum += output[i];
+        for(int i = 0; i < n; i++) destination[i] = source[i];
     }
-    for(int i = 0; i < n; i++) 
+
+    void vectorFill(double *v, int n, double value)
     {
-        output[i] /= sum;
+        for(int i = 0; i < n; i++) v[i] = value;
     }
-}
-void logSoftMax(const double *input, double *output, int n)
-{
-    double maxValue = vectorMax(input, n);
-    double sum = 0.0;
-    for(int i = 0; i < n; i++)
+
+    void softMax(const double *input, double *output, int n)
     {
-       sum += advanced_math::exponential(input[i] - maxValue);
+        double maxValue = vectorMax(input, n);
+
+        double sum = 0.0;
+        for(int i = 0; i < n; i++)
+        {
+            double e = advanced_math::exponential(input[i] - maxValue);
+            output[i] = e;
+            sum += e;
+        }
+
+        if(badSum(sum))
+        {
+            double u = 1.0 / (double)n;
+            for(int i = 0; i < n; i++) output[i] = u;
+            return;
+        }
+
+        double inv = 1.0 / sum;
+        for(int i = 0; i < n; i++) output[i] *= inv;
     }
-    double logSum = advanced_math::logarithm(sum);
-    for(int i = 0; i < n; i++) 
+
+    void logSoftMax(const double *input, double *output, int n)
     {
-        output[i] = input[i] - maxValue - logSum;
+        double maxValue = vectorMax(input, n);
+
+        double sum = 0.0;
+        for(int i = 0; i < n; i++)
+            sum += advanced_math::exponential(input[i] - maxValue);
+
+        if(badSum(sum))
+        {
+            double l = -advanced_math::logarithm((double)n);
+            for(int i = 0; i < n; i++) output[i] = l;
+            return;
+        }
+
+        double logSum = advanced_math::logarithm(sum);
+        for(int i = 0; i < n; i++)
+            output[i] = (input[i] - maxValue) - logSum;
     }
-}
 }

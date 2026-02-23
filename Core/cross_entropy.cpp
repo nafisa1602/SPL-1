@@ -1,44 +1,35 @@
 #include "cross_entropy.h"
 #include "vector_math.h"
 #include "advanced_math.h"
+
 namespace cross_entropy
 {
-    double categoricalCrossEntropy(const double* yTrue, const double* yPredic, int numClasses)
+    double categoricalCrossEntropy(const double* yTrue, const double* yPred, int numClasses)
     {
-        const double epsilon = 1e-9;   
+        const double eps = 1e-9;
         double loss = 0.0;
         for(int i = 0; i < numClasses; i++)
         {
-            double probabilty = advanced_math::clamp(yPredic[i], epsilon, 1.0);
-            loss += -yTrue[i] * advanced_math::logarithm(probabilty);
+            double p = advanced_math::clamp(yPred[i], eps, 1.0 - eps);
+            loss += -yTrue[i] * advanced_math::logarithm(p);
         }
         return loss;
     }
-    
-    double categoricalCrossEntropyLogits(const double *yTrue, const double *logits, int numClasses)
-   {
-    double *probs = new double[numClasses];
-    vector_math::softMax(logits, probs, numClasses);
-    const double eps = 1e-9;
-    double loss = 0.0;
-    for(int i = 0; i < numClasses; i++)
+
+    double categoricalCrossEntropyFromLogits_OneHotY(
+        int y, const double* logits, double* logProbsWorkspace, int numClasses
+    )
     {
-        double p = advanced_math::clamp(probs[i], eps, 1.0);
-        loss += -yTrue[i] * advanced_math::logarithm(p);
+        vector_math::logSoftMax(logits, logProbsWorkspace, numClasses);
+        return -logProbsWorkspace[y];
     }
-    delete[] probs;
-    return loss;
-}
 
-    void softmaxCrossEntroGrad(const double* logits, const double* yTrue, double* gradient, int numClasses)
+    void softmaxCrossEntroGrad_OneHotY(
+        const double* logits, int y, double* gradient, double* probsWorkspace, int numClasses
+    )
     {
-        double *probabilities = new double[numClasses];
-        vector_math::softMax(logits, probabilities, numClasses);
-
-        for(int i = 0; i < numClasses; i++)
-        {
-            gradient[i] = probabilities[i] - yTrue[i];
-        }
-        delete[] probabilities;
+        vector_math::softMax(logits, probsWorkspace, numClasses);
+        for(int i = 0; i < numClasses; i++) gradient[i] = probsWorkspace[i];
+        gradient[y] -= 1.0;
     }
 }

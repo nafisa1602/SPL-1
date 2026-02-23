@@ -24,6 +24,7 @@ int main()
     cout << clamp(10, 20, 50) << endl;
     return 0;
 }*/
+/*
 #include <iostream>
 #include "basic_math.h"
 #include "advanced_math.h"
@@ -67,4 +68,5 @@ int main()
 
     return 0;
 }
+    */
 
