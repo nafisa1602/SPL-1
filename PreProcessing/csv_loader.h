@@ -4,15 +4,57 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <iostream>
+#include <filesystem>
+#include <cstdlib>
 #include "dns_cleaner.h"
 #include "dns_encoder.h"
 #include "label.h"
-void loadDataset(const std::string &filename, std::vector<std::vector<int>> &X, std::vector<int> &y)
+
+// Helper function to find dataset path (portable, not hardcoded)
+inline std::string getDatasetPath(const std::string &filename)
 {
-    std::ifstream file("/home/nafisa/Documents/SPL-1 Project Draft/Datasets/merged/" + filename); // path to merged dataset
+    // Try multiple possible locations:
+    // 1. Relative to executable: ../Datasets/merged/
+    // 2. Environment variable DATASET_PATH
+    // 3. Current directory: ./Datasets/merged/
+    
+    namespace fs = std::filesystem;
+    
+    std::vector<std::string> searchPaths = {
+        "../Datasets/merged/" + filename,
+        "Datasets/merged/" + filename,
+        "./Datasets/merged/" + filename
+    };
+    
+    // Also check environment variable
+    const char* envPath = std::getenv("DATASET_PATH");
+    if(envPath) {
+        searchPaths.insert(searchPaths.begin(), std::string(envPath) + "/" + filename);
+    }
+    
+    for(const auto &path : searchPaths) {
+        if(fs::exists(path)) {
+            std::cerr << "[INFO] Using dataset: " << path << "\n";
+            return path;
+        }
+    }
+    
+    // If no path found, return first option and let it fail gracefully
+    std::cerr << "[ERROR] Dataset not found in any standard location. Tried:\n";
+    for(const auto &path : searchPaths)
+        std::cerr << "  - " << path << "\n";
+    
+    return searchPaths[0];
+}
+
+inline void loadDataset(const std::string &filename, std::vector<std::vector<int>> &X, std::vector<int> &y)
+{
+    std::string datasetPath = getDatasetPath(filename);
+    std::ifstream file(datasetPath);
     if (!file.is_open())
     {
-        std::cerr << "Cannot open file: " << filename << "\n";
+        std::cerr << "Cannot open file: " << datasetPath << "\n";
         return;
     }
     std::string line;
@@ -47,7 +89,7 @@ void loadDataset(const std::string &filename, std::vector<std::vector<int>> &X, 
     }
     file.close();
     if(skippedEmpty > 0) std::cout << "Skipped " << skippedEmpty << " empty lines in  " << filename << "\n";
-    if(skippedLabel > 0) std::cout << "Skipped " << skippedLabel << " unlnown labels in " << filename << "\n";
+    if(skippedLabel > 0) std::cout << "Skipped " << skippedLabel << " unknown labels in " << filename << "\n";
 }
 #endif
 

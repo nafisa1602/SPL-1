@@ -1,6 +1,6 @@
 #ifndef LSTM_BACKWARD_H
 #define LSTM_BACKWARD_H
-
+#include <vector>
 #include "lstm.h"
 
 void lstmBackwardTruncated(

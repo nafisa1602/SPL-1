@@ -1,26 +1,26 @@
-#include"rng.h"
+#include "rng.h"
+#include <random>
+
 namespace rng
 {
-    static unsigned int state = 2463534242u;
+    // Use MT19937 for better quality RNG with period 2^19937-1 (vs XorShift32's 2^32)
+    static std::mt19937 generator(2463534242u);
+    
     void seed(unsigned int s)
     {
-        if(s == 0u) state = 2463534242u;
-        else state = s;
+        if(s == 0u) 
+            generator.seed(2463534242u);
+        else 
+            generator.seed(s);
     }
-    unsigned int shift()
-    {
-        unsigned int x = state;
-        x ^= x << 13;
-        x ^= x >> 17;
-        x ^= x << 5;
-        state = x;
-        return x;
-    }
+    
     double uniform01()
     {
-        unsigned int x = shift();
-        return (x >> 8) * (1.0 / 16777216.0);
+        // Generate uniform random in [0.0, 1.0)
+        static std::uniform_real_distribution<double> dist(0.0, 1.0);
+        return dist(generator);
     }
+    
     double uniform(double a, double b)
     {
         return a + (b - a) * uniform01();

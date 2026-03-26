@@ -13,6 +13,8 @@ namespace dense
         ~denseLayer();
         void forward(const double *input, double *output);
         void backward(const double *denseOutput, double *denseInput, double learningRate);
+        double* getWeights() {return weight;}
+        double* getBias() {return bias;}
     };
 }
 #endif

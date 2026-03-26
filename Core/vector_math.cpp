@@ -71,8 +71,10 @@ namespace vector_math
             sum += e;
         }
 
-        if(badSum(sum))
+        // More robust check: handle underflow and overflow
+        if(badSum(sum) || sum < 1e-300)
         {
+            // All values went to zero (extreme underflow): use uniform distribution
             double u = 1.0 / (double)n;
             for(int i = 0; i < n; i++) output[i] = u;
             return;

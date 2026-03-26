@@ -1,4 +1,5 @@
 #include<iostream>
+#include "advanced_math.h"
 #include "matrix_math.h"
 namespace matrix_math
 {
@@ -151,7 +152,7 @@ void matrixDivRowVec(double *a, const double *v, int row, int column)
     {
         for(int j = 0; j < column; j++)
         {
-           a[i*column+j] /= v[j];
+           if(v[j] != 0.0) a[i*column+j] /= v[j];
         }
     }   
 }
