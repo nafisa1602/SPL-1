@@ -1,159 +1,155 @@
-#include<iostream>
+#include <iostream>
+
 #include "advanced_math.h"
 #include "matrix_math.h"
+
 namespace matrix_math
 {
-void matrixZero(double *a, int row, int column)
+void matrixZero(double* matrix, int rows, int cols)
 {
-    for(int i = 0; i < row; i++)
-    {
-        for(int j = 0; j < column; j++)
-        {
-            a[ i*column + j ] = 0.0;
+    for (int r = 0; r < rows; r++) {
+        for (int c = 0; c < cols; c++) {
+            matrix[r * cols + c] = 0.0;
         }
     }
 }
-void matrixCopy(const double *source, double *dest, int row, int column)
+
+void matrixCopy(const double* source, double* destination, int rows, int cols)
 {
-    for(int i = 0; i < row; i++)
-    {
-        for(int j = 0; j < column; j++)
-        {
-            dest[ i*column + j ] = source[ i*column + j];
+    for (int r = 0; r < rows; r++) {
+        for (int c = 0; c < cols; c++) {
+            destination[r * cols + c] = source[r * cols + c];
         }
     }
 }
-void matrixPrint(const double *a, int row, int column)
+
+void matrixPrint(const double* matrix, int rows, int cols)
 {
-    for(int i = 0; i < row; i++)
-    {
-        for(int j = 0; j < column; j++)
-        {
-            std::cout << a[ i*column + j] << " ";
+    for (int r = 0; r < rows; r++) {
+        for (int c = 0; c < cols; c++) {
+            std::cout << matrix[r * cols + c] << " ";
         }
         std::cout << std::endl;
     }
 }
-void matrixAdd(const double *a, const double *b, double *c, int row, int column)
+
+void matrixAdd(const double* lhs, const double* rhs, double* result, int rows, int cols)
 {
-    for(int i = 0; i < row; i++)
-    {
-        for(int j = 0; j < column; j++)
-        {
-            c[i*column+j] = a[i*column+j] + b[i*column+j];
+    for (int r = 0; r < rows; r++) {
+        for (int c = 0; c < cols; c++) {
+            result[r * cols + c] = lhs[r * cols + c] + rhs[r * cols + c];
         }
     }
 }
-void matrixSubtract(const double *a, const double *b, double *c, int row, int column)
+
+void matrixSubtract(const double* lhs, const double* rhs, double* result, int rows, int cols)
 {
-   for(int i = 0; i < row; i++)
-    {
-        for(int j = 0; j < column; j++)
-        {
-            c[i*column+j] = a[i*column+j] - b[i*column+j];
-        }
-    } 
-}
-void matrixScalarMultiply(double *a, int row, int column, double scalar)
-{
-    for(int i = 0; i < row; i++)
-    {
-        for(int j = 0; j < column; j++)
-        {
-            a[i*column+j] = a[i*column+j] * scalar;
+    for (int r = 0; r < rows; r++) {
+        for (int c = 0; c < cols; c++) {
+            result[r * cols + c] = lhs[r * cols + c] - rhs[r * cols + c];
         }
     }
 }
-bool matrixMultiply(const double *a, const double *b, int rowA, int colA, int rowB, int colB, double *c)
+
+void matrixScalarMultiply(double* matrix, int rows, int cols, double scalar)
 {
-    if(colA != rowB) return false;
-    if(a == nullptr || b == nullptr || c== nullptr) return false;
-    for(int i = 0; i < rowA; i++)
-    {
-        for(int j = 0; j < colB; j++)
-        {
-            c[i*colB+j] = 0.0;
-            for(int k = 0; k < colA; k++)
-            {
-                c[i*colB+j] += a[i*colA+k] * b[k*colB+j];
+    for (int r = 0; r < rows; r++) {
+        for (int c = 0; c < cols; c++) {
+            matrix[r * cols + c] = matrix[r * cols + c] * scalar;
+        }
+    }
+}
+
+bool matrixMultiply(const double* lhs, const double* rhs, int lhsRows, int lhsCols, int rhsRows, int rhsCols, double* result)
+{
+    if (lhsCols != rhsRows) {
+        return false;
+    }
+    if (lhs == nullptr || rhs == nullptr || result == nullptr) {
+        return false;
+    }
+
+    for (int r = 0; r < lhsRows; r++) {
+        for (int c = 0; c < rhsCols; c++) {
+            result[r * rhsCols + c] = 0.0;
+            for (int k = 0; k < lhsCols; k++) {
+                result[r * rhsCols + c] += lhs[r * lhsCols + k] * rhs[k * rhsCols + c];
             }
         }
     }
+
     return true;
 }
-void matrixTranspose(const double *a, int row, int column, double *at)
+
+void matrixTranspose(const double* matrix, int rows, int cols, double* transpose)
 {
-    for(int i = 0; i < row; i++)
-    {
-        for(int j = 0; j < column; j++)
-        {
-           at[j*row + i] = a[i*column + j];
+    for (int r = 0; r < rows; r++) {
+        for (int c = 0; c < cols; c++) {
+            transpose[c * rows + r] = matrix[r * cols + c];
         }
     }
 }
-void matrixRowSum(const double *a, double *result, int row, int column)
+
+void matrixRowSum(const double* matrix, double* result, int rows, int cols)
 {
-    for(int i = 0; i < row; i++)
-    {
+    for (int r = 0; r < rows; r++) {
         double rowSum = 0.0;
-        for(int j = 0; j < column; j++)
-        {
-            rowSum += a[i*column+j];
+        for (int c = 0; c < cols; c++) {
+            rowSum += matrix[r * cols + c];
         }
-        result[i] = rowSum;
+        result[r] = rowSum;
     }
 }
-void matrixRowMax(const double *a, double *result, int row, int column)
+
+void matrixRowMax(const double* matrix, double* result, int rows, int cols)
 {
-   for(int i = 0; i < row; i++)
-    {
-        double maxValue = a[i*column];
-        for(int j = 0; j < column; j++)
-        {
-            double value = a[i*column + j];
-            if(maxValue < value) maxValue = value;
+    for (int r = 0; r < rows; r++) {
+        double maxValue = matrix[r * cols];
+        for (int c = 0; c < cols; c++) {
+            double value = matrix[r * cols + c];
+            if (maxValue < value) {
+                maxValue = value;
+            }
         }
-    result[i] = maxValue;   
-    } 
+        result[r] = maxValue;
+    }
 }
-void matrixExpo(double *a, int row, int column)
+
+void matrixExpo(double* matrix, int rows, int cols)
 {
-   for(int i = 0; i < row; i++)
-    {
-        for(int j = 0; j < column; j++)
-        {
-           a[i*column+j] = advanced_math::exponential(a[i*column+j]);
+    for (int r = 0; r < rows; r++) {
+        for (int c = 0; c < cols; c++) {
+            matrix[r * cols + c] = advanced_math::exponential(matrix[r * cols + c]);
         }
-    } 
+    }
 }
-void matrixLog(double *a, int row, int column)
+
+void matrixLog(double* matrix, int rows, int cols)
 {
-   for(int i = 0; i < row; i++)
-    {
-        for(int j = 0; j < column; j++)
-        {
-           a[i*column+j] = advanced_math::logarithm(a[i*column+j]);
+    for (int r = 0; r < rows; r++) {
+        for (int c = 0; c < cols; c++) {
+            matrix[r * cols + c] = advanced_math::logarithm(matrix[r * cols + c]);
         }
-    } 
+    }
 }
-void matrixAddRowVec(double *a, const double *v, int row, int column)
+
+void matrixAddRowVec(double* matrix, const double* rowVector, int rows, int cols)
 {
-  for(int i = 0; i < row; i++)
-    {
-        for(int j = 0; j < column; j++)
-        {
-           a[i*column+j] += v[j];
+    for (int r = 0; r < rows; r++) {
+        for (int c = 0; c < cols; c++) {
+            matrix[r * cols + c] += rowVector[c];
         }
-    }   
+    }
 }
-void matrixDivRowVec(double *a, const double *v, int row, int column)
+
+void matrixDivRowVec(double* matrix, const double* rowVector, int rows, int cols)
 {
-  for(int i = 0; i < row; i++)
-    {
-        for(int j = 0; j < column; j++)
-        {
-           if(v[j] != 0.0) a[i*column+j] /= v[j];
+    for (int r = 0; r < rows; r++) {
+        for (int c = 0; c < cols; c++) {
+            if (rowVector[c] != 0.0) {
+                matrix[r * cols + c] /= rowVector[c];
+            }
         }
-    }   
+    }
 }
 }

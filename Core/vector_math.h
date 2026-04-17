@@ -3,21 +3,21 @@
 
 namespace vector_math
 {
-    double vectorSum(const double *v, int n);
-    double vectorMax(const double *v, int n);
-    double vectorDot(const double *a, const double *b, int n);
+double vectorSum(const double* values, int size);
+double vectorMax(const double* values, int size);
+double vectorDot(const double* lhs, const double* rhs, int size);
 
-    void vectorScalar(double *v, int n, double scalar);
-    void vectorScalarDivide(double *v, int n, double scalar);
+void vectorScalar(double* values, int size, double scalar);
+void vectorScalarDivide(double* values, int size, double scalar);
 
-    void vectorAddition(const double *a, const double *b, double *result, int n);
-    void vectorSubtraction(const double *a, const double *b, double *result, int n);
+void vectorAddition(const double* lhs, const double* rhs, double* result, int size);
+void vectorSubtraction(const double* lhs, const double* rhs, double* result, int size);
 
-    void vectorCopy(const double *source, double *destination, int n);
-    void vectorFill(double *v, int n, double value);
+void vectorCopy(const double* source, double* destination, int size);
+void vectorFill(double* values, int size, double value);
 
-    void softMax(const double *input, double *output, int n);
-    void logSoftMax(const double *input, double *output, int n);
+void softMax(const double* input, double* output, int size);
+void logSoftMax(const double* input, double* output, int size);
 }
 
 #endif

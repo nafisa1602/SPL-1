@@ -3,7 +3,12 @@
 
 # Ignore compiled executables
 *.exe
-*.out
+dga_classifier
+train
+confusion
+demo
+lstm_demo
+test
 
 # Ignore build directories
 /build/
@@ -14,3 +19,14 @@
 *.swp
 *.sublime-workspace
 *.sublime-project
+
+# Ignore model binaries
+*.bin
+*.pt
+
+# Ignore zip files
+*.zip
+
+# Ignore Python cache
+__pycache__/
+*.pycs

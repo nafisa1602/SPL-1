@@ -4,9 +4,9 @@
 
 static inline double clip(double x, double limit)
 {
-    if(limit <= 0.0) return x;
-    if(x >  limit) return  limit;
-    if(x < -limit) return -limit;
+    if (limit <= 0.0) return x;
+    if (x > limit) return limit;
+    if (x < -limit) return -limit;
     return x;
 }
 
@@ -16,24 +16,25 @@ static double computeGradientNorm(
     const std::vector<double>& gFB, const std::vector<double>& gIB,
     const std::vector<double>& gOB, const std::vector<double>& gCB)
 {
-    double norm_sq = 0.0;
-    for(size_t i = 0; i < gFW.size(); i++) norm_sq += gFW[i] * gFW[i];
-    for(size_t i = 0; i < gIW.size(); i++) norm_sq += gIW[i] * gIW[i];
-    for(size_t i = 0; i < gOW.size(); i++) norm_sq += gOW[i] * gOW[i];
-    for(size_t i = 0; i < gCW.size(); i++) norm_sq += gCW[i] * gCW[i];
-    for(size_t i = 0; i < gFB.size(); i++) norm_sq += gFB[i] * gFB[i];
-    for(size_t i = 0; i < gIB.size(); i++) norm_sq += gIB[i] * gIB[i];
-    for(size_t i = 0; i < gOB.size(); i++) norm_sq += gOB[i] * gOB[i];
-    for(size_t i = 0; i < gCB.size(); i++) norm_sq += gCB[i] * gCB[i];
-    return advanced_math::squareRoot(norm_sq);
+    double normSquared = 0.0;
+    for (size_t i = 0; i < gFW.size(); i++) normSquared += gFW[i] * gFW[i];
+    for (size_t i = 0; i < gIW.size(); i++) normSquared += gIW[i] * gIW[i];
+    for (size_t i = 0; i < gOW.size(); i++) normSquared += gOW[i] * gOW[i];
+    for (size_t i = 0; i < gCW.size(); i++) normSquared += gCW[i] * gCW[i];
+    for (size_t i = 0; i < gFB.size(); i++) normSquared += gFB[i] * gFB[i];
+    for (size_t i = 0; i < gIB.size(); i++) normSquared += gIB[i] * gIB[i];
+    for (size_t i = 0; i < gOB.size(); i++) normSquared += gOB[i] * gOB[i];
+    for (size_t i = 0; i < gCB.size(); i++) normSquared += gCB[i] * gCB[i];
+    return advanced_math::squareRoot(normSquared);
 }
 
 void lstmBackwardTruncated(
-    const lstmState *state, int t, int k, const double *cZero, const double *dHiddenT,
-    double *forgetGateWeight, double *forgetGateBias,
-    double *inputGateWeight,  double *inputGateBias,
-    double *outputGateWeight, double *outputGateBias,
-    double *candidateWeight,  double *candidateBias,
+    const lstmState* state, int timeSteps, int truncationWindow,
+    const double* cellZero, const double* hiddenGradAtT,
+    double* forgetGateWeight, double* forgetGateBias,
+    double* inputGateWeight, double* inputGateBias,
+    double* outputGateWeight, double* outputGateBias,
+    double* candidateWeight, double* candidateBias,
     int inputSize, int hiddenSize,
     double learningRate, double gradClip
 )
@@ -56,63 +57,57 @@ void lstmBackwardTruncated(
     static std::vector<double> dConcat;
 
     // Resize or zero all gradient accumulators
-    if((int)gradForgetW.size() != wSize)
-    {
+    if ((int)gradForgetW.size() != wSize) {
         gradForgetW.assign(wSize, 0.0); gradInputW.assign(wSize, 0.0);
         gradOutputW.assign(wSize, 0.0); gradCandW.assign(wSize, 0.0);
-    }
-    else
-    {
-        for(int i = 0; i < wSize; i++)
-        { gradForgetW[i]=0.0; gradInputW[i]=0.0; gradOutputW[i]=0.0; gradCandW[i]=0.0; }
+    } else {
+        for (int i = 0; i < wSize; i++) {
+            gradForgetW[i] = 0.0; gradInputW[i] = 0.0; gradOutputW[i] = 0.0; gradCandW[i] = 0.0;
+        }
     }
 
-    if((int)gradForgetB.size() != hiddenSize)
-    {
+    if ((int)gradForgetB.size() != hiddenSize) {
         gradForgetB.assign(hiddenSize, 0.0); gradInputB.assign(hiddenSize, 0.0);
         gradOutputB.assign(hiddenSize, 0.0); gradCandB.assign(hiddenSize, 0.0);
-    }
-    else
-    {
-        for(int i = 0; i < hiddenSize; i++)
-        { gradForgetB[i]=0.0; gradInputB[i]=0.0; gradOutputB[i]=0.0; gradCandB[i]=0.0; }
+    } else {
+        for (int i = 0; i < hiddenSize; i++) {
+            gradForgetB[i] = 0.0; gradInputB[i] = 0.0; gradOutputB[i] = 0.0; gradCandB[i] = 0.0;
+        }
     }
 
-    if((int)dHiddenNext.size() != hiddenSize)
-    {
+    if ((int)dHiddenNext.size() != hiddenSize) {
         dHiddenNext.assign(hiddenSize, 0.0); dCellNext.assign(hiddenSize, 0.0);
         dHiddenPrev.assign(hiddenSize, 0.0); dCellPrev.assign(hiddenSize, 0.0);
-    }
-    else
-    {
-        for(int i = 0; i < hiddenSize; i++)
-        { dHiddenNext[i]=0.0; dCellNext[i]=0.0; dHiddenPrev[i]=0.0; dCellPrev[i]=0.0; }
+    } else {
+        for (int i = 0; i < hiddenSize; i++) {
+            dHiddenNext[i] = 0.0; dCellNext[i] = 0.0; dHiddenPrev[i] = 0.0; dCellPrev[i] = 0.0;
+        }
     }
 
-    if((int)dConcat.size() != concatSize)
+    if ((int)dConcat.size() != concatSize)
         dConcat.assign(concatSize, 0.0);
     else
-        for(int j = 0; j < concatSize; j++) dConcat[j] = 0.0;
+        for (int j = 0; j < concatSize; j++) dConcat[j] = 0.0;
 
     // Clip incoming gradient from classifier before entering BPTT
-    for(int i = 0; i < hiddenSize; i++)
+    for (int i = 0; i < hiddenSize; i++)
     {
-        dHiddenNext[i] = clip(dHiddenT[i], gradClip);
+        dHiddenNext[i] = clip(hiddenGradAtT[i], gradClip);
         dCellNext[i]   = 0.0;
     }
 
-    int tEnd = t - k;
-    if(tEnd < 0) tEnd = 0;
+    int tEnd = timeSteps - truncationWindow;
+    if (tEnd < 0) tEnd = 0;
 
-    for(int time = t - 1; time >= tEnd; time--)
+    for (int time = timeSteps - 1; time >= tEnd; time--)
     {
         const lstmState& st = state[time];
-        const double *cPrev = (time == 0) ? cZero : state[time - 1].cell;
+        const double* cPrev = (time == 0) ? cellZero : state[time - 1].cell;
 
-        for(int i = 0; i < hiddenSize; i++) { dHiddenPrev[i]=0.0; dCellPrev[i]=0.0; }
-        for(int j = 0; j < concatSize; j++) dConcat[j] = 0.0;
+        for (int i = 0; i < hiddenSize; i++) { dHiddenPrev[i] = 0.0; dCellPrev[i] = 0.0; }
+        for (int j = 0; j < concatSize; j++) dConcat[j] = 0.0;
 
-        for(int i = 0; i < hiddenSize; i++)
+        for (int i = 0; i < hiddenSize; i++)
         {
             const double forgetGateVal = st.forget[i];
             const double inputGateVal  = st.inputGate[i];
@@ -138,7 +133,7 @@ void lstmBackwardTruncated(
             double dI_pre = dInput  * inputGateVal  * (1.0 - inputGateVal);
             double dG_pre = dCand   * (1.0 - candidateVal * candidateVal);
 
-            for(int j = 0; j < concatSize; j++)
+            for (int j = 0; j < concatSize; j++)
             {
                 const double concatVal = st.concat[j];
                 const int idx = i * concatSize + j;
@@ -163,10 +158,10 @@ void lstmBackwardTruncated(
         }
 
         // Extract dHiddenPrev from dConcat (do NOT clip dConcat anymore)
-        for(int j = 0; j < hiddenSize; j++)
+        for (int j = 0; j < hiddenSize; j++)
             dHiddenPrev[j] = dConcat[inputSize + j];
 
-        for(int i = 0; i < hiddenSize; i++)
+        for (int i = 0; i < hiddenSize; i++)
         {
             dHiddenNext[i] = dHiddenPrev[i];
             dCellNext[i]   = dCellPrev[i];
@@ -174,39 +169,40 @@ void lstmBackwardTruncated(
     }
 
     // Average gradients over k timesteps
-    double invK = (k > 0) ? 1.0 / (double)k : 1.0;
-    for(int i = 0; i < wSize; i++)
+    const int normalizeSteps = (truncationWindow > 0) ? truncationWindow : 1;
+    double invK = 1.0 / (double)normalizeSteps;
+    for (int i = 0; i < wSize; i++)
     {
         gradForgetW[i] *= invK; gradInputW[i]  *= invK;
         gradOutputW[i] *= invK; gradCandW[i]   *= invK;
     }
-    for(int i = 0; i < hiddenSize; i++)
+    for (int i = 0; i < hiddenSize; i++)
     {
         gradForgetB[i] *= invK; gradInputB[i]  *= invK;
         gradOutputB[i] *= invK; gradCandB[i]   *= invK;
     }
 
     // Global gradient norm clipping
-    double grad_norm = computeGradientNorm(
+    double gradNorm = computeGradientNorm(
         gradForgetW, gradInputW, gradOutputW, gradCandW,
         gradForgetB, gradInputB, gradOutputB, gradCandB);
 
-    double clip_scale = (grad_norm > gradClip) ? gradClip / grad_norm : 1.0;
+    double clipScale = (gradNorm > gradClip) ? gradClip / gradNorm : 1.0;
     const double lr = learningRate;
 
-    for(int i = 0; i < wSize; i++)
+    for (int i = 0; i < wSize; i++)
     {
-        forgetGateWeight[i] -= lr * clip_scale * gradForgetW[i];
-        inputGateWeight[i]  -= lr * clip_scale * gradInputW[i];
-        outputGateWeight[i] -= lr * clip_scale * gradOutputW[i];
-        candidateWeight[i]  -= lr * clip_scale * gradCandW[i];
+        forgetGateWeight[i] -= lr * clipScale * gradForgetW[i];
+        inputGateWeight[i]  -= lr * clipScale * gradInputW[i];
+        outputGateWeight[i] -= lr * clipScale * gradOutputW[i];
+        candidateWeight[i]  -= lr * clipScale * gradCandW[i];
     }
 
-    for(int i = 0; i < hiddenSize; i++)
+    for (int i = 0; i < hiddenSize; i++)
     {
-        forgetGateBias[i] -= lr * clip_scale * gradForgetB[i];
-        inputGateBias[i]  -= lr * clip_scale * gradInputB[i];
-        outputGateBias[i] -= lr * clip_scale * gradOutputB[i];
-        candidateBias[i]  -= lr * clip_scale * gradCandB[i];
+        forgetGateBias[i] -= lr * clipScale * gradForgetB[i];
+        inputGateBias[i]  -= lr * clipScale * gradInputB[i];
+        outputGateBias[i] -= lr * clipScale * gradOutputB[i];
+        candidateBias[i]  -= lr * clipScale * gradCandB[i];
     }
 }

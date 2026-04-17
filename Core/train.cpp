@@ -15,26 +15,35 @@ static int argmax(const double* v, int n)
 {
     int bestIdx = 0;
     double bestVal = v[0];
-    for(int i = 1; i < n; i++)
-        if(v[i] > bestVal) { bestVal = v[i]; bestIdx = i; }
+    for (int i = 1; i < n; i++) {
+        if (v[i] > bestVal) {
+            bestVal = v[i];
+            bestIdx = i;
+        }
+    }
     return bestIdx;
 }
 
 static int lastNonZeroIndex(const std::vector<int>& seq)
 {
-    for(int i = (int)seq.size() - 1; i >= 0; i--)
-        if(seq[i] != 0) return i;
+    for (int i = (int)seq.size() - 1; i >= 0; i--) {
+        if (seq[i] != 0) return i;
+    }
     return 0;
 }
 
 static void vFill(double* v, int n, double val)
 {
-    for(int i = 0; i < n; i++) v[i] = val;
+    for (int i = 0; i < n; i++) {
+        v[i] = val;
+    }
 }
 
 static void vCopy(const double* src, double* dst, int n)
 {
-    for(int i = 0; i < n; i++) dst[i] = src[i];
+    for (int i = 0; i < n; i++) {
+        dst[i] = src[i];
+    }
 }
 
 static int minInt(int a, int b) { return (a < b) ? a : b; }
@@ -42,10 +51,14 @@ static int minInt(int a, int b) { return (a < b) ? a : b; }
 void applyDropout(double* vec, double* mask, int size, double dropRate)
 {
     double scale = 1.0 / (1.0 - dropRate);
-    for(int i = 0; i < size; i++)
-    {
-        if(rng::uniform01() < dropRate) { vec[i] = 0.0; mask[i] = 0.0; }
-        else                            { vec[i] *= scale; mask[i] = scale; }
+    for (int i = 0; i < size; i++) {
+        if (rng::uniform01() < dropRate) {
+            vec[i] = 0.0;
+            mask[i] = 0.0;
+        } else {
+            vec[i] *= scale;
+            mask[i] = scale;
+        }
     }
 }
 
@@ -56,7 +69,10 @@ void saveModel(const char* filename,
                const double* classifierW, const double* classifierB, int numClasses)
 {
     std::ofstream f(filename, std::ios::binary);
-    if(!f) { std::cerr << "Failed to save model to " << filename << "\n"; return; }
+    if (!f) {
+        std::cerr << "Failed to save model to " << filename << "\n";
+        return;
+    }
 
     f.write(reinterpret_cast<const char*>(&hiddenSize), sizeof(int));
     f.write(reinterpret_cast<const char*>(&concatSize),  sizeof(int));
@@ -91,11 +107,11 @@ static int evaluateDataset(
     std::vector<double>& x, std::vector<double>& logits)
 {
     int correct = 0;
-    for(int n = 0; n < (int)X.size(); n++)
+    for (int sampleIdx = 0; sampleIdx < (int)X.size(); sampleIdx++)
     {
-        int Teff = lastNonZeroIndex(X[n]) + 1;
+        int Teff = lastNonZeroIndex(X[sampleIdx]) + 1;
 
-        for(int tt = 0; tt < Teff; tt++)
+        for (int tt = 0; tt < Teff; tt++)
         {
             vFill(state[tt].hidden,    hiddenSize, 0.0);
             vFill(state[tt].cell,      hiddenSize, 0.0);
@@ -106,14 +122,14 @@ static int evaluateDataset(
             vFill(state[tt].concat,    concatSize, 0.0);
         }
 
-        for(int tt = 0; tt < Teff; tt++)
+        for (int tt = 0; tt < Teff; tt++)
         {
             vFill(x.data(), vocabSize, 0.0);
-            int idx = X[n][tt];
-            if(idx > 0 && idx < vocabSize) x[idx] = 1.0;
+            int idx = X[sampleIdx][tt];
+            if (idx > 0 && idx < vocabSize) x[idx] = 1.0;
             
-            const double* hPrev = (tt == 0) ? hZero : state[tt-1].hidden;
-            const double* cPrev = (tt == 0) ? cZero : state[tt-1].cell;
+            const double* hPrev = (tt == 0) ? hZero : state[tt - 1].hidden;
+            const double* cPrev = (tt == 0) ? cZero : state[tt - 1].cell;
             lstmForward(x.data(), hPrev, cPrev,
                 fGateWeight, fGateBias,
                 iGateWeight, iGateBias,
@@ -122,8 +138,10 @@ static int evaluateDataset(
                 vocabSize, hiddenSize, state[tt]);
         }
 
-        classifier.forward(state[Teff-1].hidden, logits.data());
-        if(argmax(logits.data(), numClasses) == y[n]) correct++;
+        classifier.forward(state[Teff - 1].hidden, logits.data());
+        if (argmax(logits.data(), numClasses) == y[sampleIdx]) {
+            correct++;
+        }
     }
     return correct;
 }
@@ -139,7 +157,7 @@ int main()
     const int    epochs       = 40;
     const int    truncK       = 15;
     const double gradClip     = 1.0;
-    const double dropout_rate = 0.3;
+    const double dropoutRate  = 0.3;
     const int    patience     = 8;
 
     rng::seed(123456u);
@@ -152,10 +170,9 @@ int main()
     std::cout << "Test samples: "  << X_test.size()  << "\n";
 
     std::vector<int> byClass[numClasses];
-    for(int i = 0; i < (int)y_train.size(); i++)
-    {
+    for (int i = 0; i < (int)y_train.size(); i++) {
         int y = y_train[i];
-        if(y >= 0 && y < numClasses) byClass[y].push_back(i);
+        if (y >= 0 && y < numClasses) byClass[y].push_back(i);
     }
 
     const int concatSize = inputSize + hiddenSize;
@@ -179,15 +196,13 @@ int main()
     double* best_cB  = new double[hiddenSize];
 
     double lstmStddev = advanced_math::squareRoot(2.0 / (double)(inputSize + hiddenSize));
-    for(int i = 0; i < hiddenSize * concatSize; i++)
-    {
+    for (int i = 0; i < hiddenSize * concatSize; i++) {
         forgetGateWeight[i] = rng::uniform(-lstmStddev, lstmStddev);
         inputGateWeight[i]  = rng::uniform(-lstmStddev, lstmStddev);
         outputGateWeight[i] = rng::uniform(-lstmStddev, lstmStddev);
         candidateWeight[i]  = rng::uniform(-lstmStddev, lstmStddev);
     }
-    for(int i = 0; i < hiddenSize; i++)
-    {
+    for (int i = 0; i < hiddenSize; i++) {
         forgetGateBias[i] = 1.0;  // reasonable default: sigmoid(1)=0.73
         inputGateBias[i]  = 0.0;
         outputGateBias[i] = 0.0;
@@ -197,7 +212,7 @@ int main()
     dense::denseLayer classifier(hiddenSize, numClasses);
 
     lstmState state[T];
-    for(int tt = 0; tt < T; tt++)
+    for (int tt = 0; tt < T; tt++)
         initLstmState(state[tt], hiddenSize, concatSize);
 
     std::vector<double> x(inputSize), logits(numClasses), probs(numClasses);
@@ -222,18 +237,16 @@ int main()
 
     std::cout << "\n========== Training Started ==========\n\n";
 
-    for(int epoch = 0; epoch < epochs; epoch++)
-    {
+    for (int epoch = 0; epoch < epochs; epoch++) {
         double currentLR = initialLR * basic_math::power(0.95, epoch);
         double totalLoss = 0.0;
         int correctTrain = 0, usedSteps = 0;
         double maxWeightSeen = 0.0;  // track max weight magnitude this epoch
         double maxHiddenSeen = 0.0;  // track max hidden value this epoch
 
-        for(int step = 0; step < (int)X_train.size(); step++)
-        {
+        for (int step = 0; step < (int)X_train.size(); step++) {
             int cls = (int)(rng::uniform01() * numClasses);
-            if(byClass[cls].empty()) continue;
+            if (byClass[cls].empty()) continue;
             int pick = (int)(rng::uniform01() * byClass[cls].size());
             int n    = byClass[cls][pick];
 
@@ -241,8 +254,7 @@ int main()
 
             // Reset state array before each sample; stale gate values from
             // the previous sample corrupt both forward activations and BPTT
-            for(int tt = 0; tt < Teff; tt++)
-            {
+            for (int tt = 0; tt < Teff; tt++) {
                 vFill(state[tt].hidden,    hiddenSize, 0.0);
                 vFill(state[tt].cell,      hiddenSize, 0.0);
                 vFill(state[tt].forget,    hiddenSize, 0.0);
@@ -252,14 +264,13 @@ int main()
                 vFill(state[tt].concat,    concatSize, 0.0);
             }
 
-            for(int tt = 0; tt < Teff; tt++)
-            {
+            for (int tt = 0; tt < Teff; tt++) {
                 vFill(x.data(), inputSize, 0.0);
                 int idx = X_train[n][tt];
-                if(idx > 0 && idx < vocabSize) x[idx] = 1.0;
+                if (idx > 0 && idx < vocabSize) x[idx] = 1.0;
 
-                const double* hPrev = (tt == 0) ? hZero.data() : state[tt-1].hidden;
-                const double* cPrev = (tt == 0) ? cZero.data() : state[tt-1].cell;
+                const double* hPrev = (tt == 0) ? hZero.data() : state[tt - 1].hidden;
+                const double* cPrev = (tt == 0) ? cZero.data() : state[tt - 1].cell;
                 lstmForward(x.data(), hPrev, cPrev,
                     forgetGateWeight, forgetGateBias,
                     inputGateWeight,  inputGateBias,
@@ -271,40 +282,37 @@ int main()
             vCopy(state[Teff-1].hidden, hiddenDropped.data(), hiddenSize);
 
             // Track max hidden value to detect saturation
-            for(int i = 0; i < hiddenSize; i++)
-            {
+            for (int i = 0; i < hiddenSize; i++) {
                 double ah = state[Teff-1].hidden[i];
-                if(ah < 0) ah = -ah;
-                if(ah > maxHiddenSeen) maxHiddenSeen = ah;
+                if (ah < 0) ah = -ah;
+                if (ah > maxHiddenSeen) maxHiddenSeen = ah;
             }
-            applyDropout(hiddenDropped.data(), dropoutMask.data(), hiddenSize, dropout_rate);
+            applyDropout(hiddenDropped.data(), dropoutMask.data(), hiddenSize, dropoutRate);
             classifier.forward(hiddenDropped.data(), logits.data());
 
             int y = y_train[n];
-            if(y < 0 || y >= numClasses) continue;
+            if (y < 0 || y >= numClasses) continue;
 
             double loss = cross_entropy::categoricalCrossEntropyFromLogits_OneHotY(
                 y, logits.data(), logProbs.data(), numClasses);
 
             // Guard against NaN/exploded loss
-            if(loss != loss || loss > 1e6)
-            {
+            if (loss != loss || loss > 1e6) {
                 std::cout << "[WARNING] Loss explosion detected at epoch " << epoch 
                           << ", step " << step << ", class " << y 
                           << ", loss=" << loss << ", logits=[";
-                for(int i = 0; i < numClasses; i++) 
-                    std::cout << logits[i] << (i+1 < numClasses ? "," : "");
+                for (int i = 0; i < numClasses; i++)
+                    std::cout << logits[i] << (i + 1 < numClasses ? "," : "");
                 std::cout << "]\n";
                 continue;  // Skip this sample
             }
 
             // Detect sudden per-sample loss spike
-            if(epoch >= 10 && loss > 20.0)
-            {
+            if (epoch >= 10 && loss > 20.0) {
                 std::cout << "[SPIKE] epoch=" << epoch << " step=" << step
                           << " y=" << y << " loss=" << loss
                           << " logits=";
-                for(int i=0;i<numClasses;i++) std::cout << logits[i] << " ";
+                for (int i = 0; i < numClasses; i++) std::cout << logits[i] << " ";
                 std::cout << "\n";
             }
 
@@ -317,7 +325,7 @@ int main()
             // For per-sample SGD, use full LR (gradient clipping handles explosion)
             classifier.backward(dLogits.data(), dHiddenT.data(), currentLR);
 
-            for(int i = 0; i < hiddenSize; i++)
+            for (int i = 0; i < hiddenSize; i++)
                 dHiddenT[i] *= dropoutMask[i];
 
             lstmBackwardTruncated(
@@ -329,15 +337,16 @@ int main()
                 inputSize, hiddenSize, currentLR, gradClip);
 
             // Track max weight magnitude
-            for(int i = 0; i < hiddenSize * concatSize; i++)
-            {
-                double aw = forgetGateWeight[i]; if(aw<0)aw=-aw;
-                if(aw > maxWeightSeen) maxWeightSeen = aw;
-                aw = inputGateWeight[i];  if(aw<0)aw=-aw;
-                if(aw > maxWeightSeen) maxWeightSeen = aw;
+            for (int i = 0; i < hiddenSize * concatSize; i++) {
+                double aw = forgetGateWeight[i];
+                if (aw < 0) aw = -aw;
+                if (aw > maxWeightSeen) maxWeightSeen = aw;
+                aw = inputGateWeight[i];
+                if (aw < 0) aw = -aw;
+                if (aw > maxWeightSeen) maxWeightSeen = aw;
             }
 
-            if(argmax(logits.data(), numClasses) == y) correctTrain++;
+            if (argmax(logits.data(), numClasses) == y) correctTrain++;
         }
 
         double trainAcc = (usedSteps > 0) ? (double)correctTrain / usedSteps : 0.0;
@@ -351,8 +360,7 @@ int main()
                   << " | maxHidden=" << maxHiddenSeen << "\n";
 
         // Spike detection: restore best weights if loss jumps >50%
-        if(avgLoss > prevAvgLoss * 1.5)
-        {
+        if (avgLoss > prevAvgLoss * 1.5) {
             std::cout << "Loss spike detected (" << avgLoss << "), restoring best weights\n";
             vCopy(best_fgW, forgetGateWeight, hiddenSize * concatSize);
             vCopy(best_igW, inputGateWeight,  hiddenSize * concatSize);
@@ -363,9 +371,7 @@ int main()
             vCopy(best_ogB, outputGateBias,   hiddenSize);
             vCopy(best_cB,  candidateBias,    hiddenSize);
             patienceCounter++;
-        }
-        else
-        {
+        } else {
             prevAvgLoss = avgLoss;
         }
 
@@ -387,8 +393,7 @@ int main()
                   << " | TrainAcc: " << trainAcc
                   << " | TestAcc: "  << testAcc;
 
-        if(testAcc > bestTestAcc)
-        {
+        if (testAcc > bestTestAcc) {
             bestTestAcc     = testAcc;
             bestEpoch       = epoch;
             patienceCounter = 0;
@@ -405,12 +410,9 @@ int main()
                 forgetGateBias,   inputGateBias,   outputGateBias,   candidateBias,
                 hiddenSize, concatSize, classifier.weight, classifier.bias, numClasses);
             std::cout << " NEW BEST!";
-        }
-        else
-        {
+        } else {
             patienceCounter++;
-            if(patienceCounter >= patience)
-            {
+            if (patienceCounter >= patience) {
                 std::cout << "\n\nEarly stopping triggered (no improvement for "
                           << patience << " epochs)\n";
                 break;
@@ -423,7 +425,7 @@ int main()
     std::cout << "Best Test Accuracy: " << bestTestAcc << " (Epoch " << bestEpoch << ")\n";
     std::cout << "Model saved to: best_model.bin\n\n";
 
-    for(int tt = 0; tt < T; tt++) freeLstmState(state[tt]);
+    for (int tt = 0; tt < T; tt++) freeLstmState(state[tt]);
 
     delete[] forgetGateWeight; delete[] inputGateWeight;
     delete[] outputGateWeight; delete[] candidateWeight;

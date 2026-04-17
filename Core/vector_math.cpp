@@ -6,101 +6,127 @@ static inline int badSum(double s) { return (!(s > 0.0)) || isNaN(s) || (s > 1e3
 
 namespace vector_math
 {
-    double vectorSum(const double *v, int n)
-    {
-        double sum = 0.0;
-        for(int i = 0; i < n; i++) sum += v[i];
-        return sum;
+double vectorSum(const double* values, int size)
+{
+    double sum = 0.0;
+    for (int i = 0; i < size; i++) {
+        sum += values[i];
     }
+    return sum;
+}
 
-    double vectorMax(const double *v, int n)
-    {
-        double m = v[0];
-        for(int i = 1; i < n; i++)
-            if(v[i] > m) m = v[i];
-        return m;
-    }
-
-    double vectorDot(const double *a, const double *b, int n)
-    {
-        double sum = 0.0;
-        for(int i = 0; i < n; i++) sum += a[i] * b[i];
-        return sum;
-    }
-
-    void vectorScalar(double *v, int n, double scalar)
-    {
-        for(int i = 0; i < n; i++) v[i] *= scalar;
-    }
-
-    void vectorScalarDivide(double *v, int n, double scalar)
-    {
-        if(scalar == 0.0) return;
-        for(int i = 0; i < n; i++) v[i] /= scalar;
-    }
-
-    void vectorAddition(const double *a, const double *b, double *result, int n)
-    {
-        for(int i = 0; i < n; i++) result[i] = a[i] + b[i];
-    }
-
-    void vectorSubtraction(const double *a, const double *b, double *result, int n)
-    {
-        for(int i = 0; i < n; i++) result[i] = a[i] - b[i];
-    }
-
-    void vectorCopy(const double *source, double *destination, int n)
-    {
-        for(int i = 0; i < n; i++) destination[i] = source[i];
-    }
-
-    void vectorFill(double *v, int n, double value)
-    {
-        for(int i = 0; i < n; i++) v[i] = value;
-    }
-
-    void softMax(const double *input, double *output, int n)
-    {
-        double maxValue = vectorMax(input, n);
-
-        double sum = 0.0;
-        for(int i = 0; i < n; i++)
-        {
-            double e = advanced_math::exponential(input[i] - maxValue);
-            output[i] = e;
-            sum += e;
+double vectorMax(const double* values, int size)
+{
+    double maxValue = values[0];
+    for (int i = 1; i < size; i++) {
+        if (values[i] > maxValue) {
+            maxValue = values[i];
         }
+    }
+    return maxValue;
+}
 
-        // More robust check: handle underflow and overflow
-        if(badSum(sum) || sum < 1e-300)
-        {
-            // All values went to zero (extreme underflow): use uniform distribution
-            double u = 1.0 / (double)n;
-            for(int i = 0; i < n; i++) output[i] = u;
-            return;
-        }
+double vectorDot(const double* lhs, const double* rhs, int size)
+{
+    double sum = 0.0;
+    for (int i = 0; i < size; i++) {
+        sum += lhs[i] * rhs[i];
+    }
+    return sum;
+}
 
-        double inv = 1.0 / sum;
-        for(int i = 0; i < n; i++) output[i] *= inv;
+void vectorScalar(double* values, int size, double scalar)
+{
+    for (int i = 0; i < size; i++) {
+        values[i] *= scalar;
+    }
+}
+
+void vectorScalarDivide(double* values, int size, double scalar)
+{
+    if (scalar == 0.0) {
+        return;
     }
 
-    void logSoftMax(const double *input, double *output, int n)
-    {
-        double maxValue = vectorMax(input, n);
-
-        double sum = 0.0;
-        for(int i = 0; i < n; i++)
-            sum += advanced_math::exponential(input[i] - maxValue);
-
-        if(badSum(sum))
-        {
-            double l = -advanced_math::logarithm((double)n);
-            for(int i = 0; i < n; i++) output[i] = l;
-            return;
-        }
-
-        double logSum = advanced_math::logarithm(sum);
-        for(int i = 0; i < n; i++)
-            output[i] = (input[i] - maxValue) - logSum;
+    for (int i = 0; i < size; i++) {
+        values[i] /= scalar;
     }
+}
+
+void vectorAddition(const double* lhs, const double* rhs, double* result, int size)
+{
+    for (int i = 0; i < size; i++) {
+        result[i] = lhs[i] + rhs[i];
+    }
+}
+
+void vectorSubtraction(const double* lhs, const double* rhs, double* result, int size)
+{
+    for (int i = 0; i < size; i++) {
+        result[i] = lhs[i] - rhs[i];
+    }
+}
+
+void vectorCopy(const double* source, double* destination, int size)
+{
+    for (int i = 0; i < size; i++) {
+        destination[i] = source[i];
+    }
+}
+
+void vectorFill(double* values, int size, double value)
+{
+    for (int i = 0; i < size; i++) {
+        values[i] = value;
+    }
+}
+
+void softMax(const double* input, double* output, int size)
+{
+    double maxValue = vectorMax(input, size);
+    double sum = 0.0;
+
+    for (int i = 0; i < size; i++) {
+        double e = advanced_math::exponential(input[i] - maxValue);
+        output[i] = e;
+        sum += e;
+    }
+
+    if (badSum(sum) || sum < 1e-300) {
+        // Extreme underflow fallback: preserve a valid probability distribution.
+        double uniform = 1.0 / (double)size;
+        for (int i = 0; i < size; i++) {
+            output[i] = uniform;
+        }
+        return;
+    }
+
+    double invSum = 1.0 / sum;
+    for (int i = 0; i < size; i++) {
+        output[i] *= invSum;
+    }
+}
+
+void logSoftMax(const double* input, double* output, int size)
+{
+    double maxValue = vectorMax(input, size);
+    double sum = 0.0;
+
+    for (int i = 0; i < size; i++) {
+        sum += advanced_math::exponential(input[i] - maxValue);
+    }
+
+    if (badSum(sum)) {
+        double logUniform = -advanced_math::logarithm((double)size);
+        for (int i = 0; i < size; i++) {
+            output[i] = logUniform;
+        }
+        return;
+    }
+
+    double logSum = advanced_math::logarithm(sum);
+    for (int i = 0; i < size; i++) {
+        output[i] = (input[i] - maxValue) - logSum;
+    }
+}
 }
