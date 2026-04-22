@@ -1,8 +1,6 @@
 #include <iostream>
 #include <vector>
 #include <cstdio>
-#include <algorithm>
-
 #include "configure.h"
 #include "csv_loader.h"
 #include "lstm.h"
@@ -12,8 +10,10 @@ static int argmax(const double* v, int n)
 {
     int bestIdx = 0;
     double bestVal = v[0];
-    for (int i = 1; i < n; i++) {
-        if (v[i] > bestVal) {
+    for (int i = 1; i < n; i++) 
+    {
+        if (v[i] > bestVal) 
+        {
             bestVal = v[i];
             bestIdx = i;
         }
@@ -23,81 +23,63 @@ static int argmax(const double* v, int n)
 
 static int lastNonZeroIndex(const std::vector<int>& seq)
 {
-    for (int i = (int)seq.size() - 1; i >= 0; i--) {
+    for (int i = (int)seq.size() - 1; i >= 0; i--) 
+    {
         if (seq[i] != 0) return i;
     }
     return 0;
 }
 
-bool loadModel(const char* filename,
-               double* fgW, double* igW, double* ogW, double* candW,
-               double* fgB, double* igB, double* ogB, double* candB,
-               int hiddenSize, int concatSize,
-               double* classifierW, double* classifierB, int numClasses)
+bool loadModel(const char* filename, double* fgW, double* igW, double* ogW, double* candW, double* fgB, double* igB, double* ogB, double* candB, 
+    int hiddenSize, int concatSize,double* classifierW, double* classifierB, int numClasses)
 {
     auto readExact = [](FILE* file, void* dst, size_t elemSize, size_t count) -> bool
     {
         return std::fread(dst, elemSize, count, file) == count;
     };
-
     FILE* f = fopen(filename, "rb");
-    if (!f) {
+    if (!f) 
+    {
         std::cerr << "Failed to load model from " << filename << "\n";
         return false;
     }
-    
     // Read and verify metadata
     int savedHidden, savedConcat, savedClasses;
-    if (!readExact(f, &savedHidden, sizeof(int), 1) ||
-        !readExact(f, &savedConcat, sizeof(int), 1) ||
-        !readExact(f, &savedClasses, sizeof(int), 1))
+    if (!readExact(f, &savedHidden, sizeof(int), 1) || !readExact(f, &savedConcat, sizeof(int), 1) || !readExact(f, &savedClasses, sizeof(int), 1))
     {
         std::cerr << "Failed to read model header from " << filename << "\n";
         fclose(f);
         return false;
     }
-    
-    if (savedHidden != hiddenSize || savedConcat != concatSize || savedClasses != numClasses) {
+    if (savedHidden != hiddenSize || savedConcat != concatSize || savedClasses != numClasses) 
+    {
         std::cerr << "Model dimensions mismatch!\n";
         std::cerr << "Expected: hidden=" << hiddenSize << ", concat=" << concatSize << ", classes=" << numClasses << "\n";
         std::cerr << "Got: hidden=" << savedHidden << ", concat=" << savedConcat << ", classes=" << savedClasses << "\n";
         fclose(f);
         return false;
     }
-    
     int totalWeights = hiddenSize * concatSize;
-    
-    // Read LSTM weights
-    if (!readExact(f, fgW, sizeof(double), totalWeights) ||
-        !readExact(f, igW, sizeof(double), totalWeights) ||
-        !readExact(f, ogW, sizeof(double), totalWeights) ||
-        !readExact(f, candW, sizeof(double), totalWeights))
+    if (!readExact(f, fgW, sizeof(double), totalWeights) || !readExact(f, igW, sizeof(double), totalWeights) || 
+        !readExact(f, ogW, sizeof(double), totalWeights) || !readExact(f, candW, sizeof(double), totalWeights))
     {
         std::cerr << "Failed to read LSTM weights from " << filename << "\n";
         fclose(f);
         return false;
     }
-    
-    // Read LSTM biases
-    if (!readExact(f, fgB, sizeof(double), hiddenSize) ||
-        !readExact(f, igB, sizeof(double), hiddenSize) ||
-        !readExact(f, ogB, sizeof(double), hiddenSize) ||
-        !readExact(f, candB, sizeof(double), hiddenSize))
+    if (!readExact(f, fgB, sizeof(double), hiddenSize) || !readExact(f, igB, sizeof(double), hiddenSize) ||
+        !readExact(f, ogB, sizeof(double), hiddenSize) || !readExact(f, candB, sizeof(double), hiddenSize))
     {
         std::cerr << "Failed to read LSTM biases from " << filename << "\n";
         fclose(f);
         return false;
     }
-    
-    // Read classifier weights and biases
-    if (!readExact(f, classifierW, sizeof(double), hiddenSize * numClasses) ||
-        !readExact(f, classifierB, sizeof(double), numClasses))
+    if (!readExact(f, classifierW, sizeof(double), hiddenSize * numClasses) || !readExact(f, classifierB, sizeof(double), numClasses))
     {
         std::cerr << "Failed to read classifier parameters from " << filename << "\n";
         fclose(f);
         return false;
     }
-    
     fclose(f);
     std::cout << "Model loaded from " << filename << "\n";
     return true;
@@ -107,7 +89,6 @@ int main(int argc, char* argv[])
 {
     const char* modelPath = "best_model.bin";
     const char* testDataPath = "test.csv";
-    
     // Allow command line arguments
     if (argc > 1) modelPath = argv[1];
     if (argc > 2) testDataPath = argv[2];
@@ -180,7 +161,7 @@ int main(int argc, char* argv[])
 
         for (int tt = 0; tt < Teff; tt++)
         {
-            std::fill(x.begin(), x.end(), 0.0);
+            for (int i = 0; i < inputSize; i++) x[i] = 0.0;
             int idx = X_test[sampleIdx][tt];
             if (idx > 0 && idx < vocabSize)
                 x[idx] = 1.0;
@@ -220,7 +201,7 @@ int main(int argc, char* argv[])
     std::cout << "Test Accuracy: " << testAcc * 100.0 << "% (" << correctTest << "/" << X_test.size() << ")\n\n";
 
     // Print confusion matrix
-    std::cout << "Confusion Matrix (rows=actual, cols=predicted):\n";
+    std::cout << "Percentage (rows=actual, cols=predicted):\n";
     std::cout << "     ";
     for (int i = 0; i < numClasses; i++)
         std::cout << "  [" << i << "]";

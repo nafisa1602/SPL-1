@@ -14,18 +14,12 @@
 #include "basic_math.h"
 #include <fstream>
 #include <sstream>
-// ============================================================================
-// SHARED UTILITIES
-// ============================================================================
-
-// ─────────────────────────────────────────────
-//  Label names
-// ─────────────────────────────────────────────
- 
-static const char* CLASS_NAMES[5] = {
+static const char* CLASS_NAMES[5] = 
+{
     "Benign", "DGA", "Phishing", "Tunneling", "C2"
 };
-static const char* CLASS_DESC[5] = {
+static const char* CLASS_DESC[5] = 
+{
     "Normal / safe traffic",
     "Domain Generation Algorithm (malware)",
     "Phishing domain",
@@ -33,11 +27,6 @@ static const char* CLASS_DESC[5] = {
     "Command & Control communication"
 };
 static constexpr int kClassCount = 5;
- 
-// ─────────────────────────────────────────────
-//  Model loading  (same binary format as train.cpp)
-// ─────────────────────────────────────────────
- 
 struct Model
 {
     int hiddenSize;
@@ -116,11 +105,7 @@ static bool loadModel(const char* path, Model& m)
     fclose(f);
     return true;
 }
- 
-// ─────────────────────────────────────────────
-//  Inference for a single encoded sequence
-// ─────────────────────────────────────────────
- 
+
 static int predict(const std::vector<int>& seq, const Model& m,
                    std::vector<double>& confidences)
 {
@@ -189,11 +174,7 @@ static int predict(const std::vector<int>& seq, const Model& m,
         if (confidences[i] > confidences[best]) best = i;
     return best;
 }
- 
-// ─────────────────────────────────────────────
-//  Output helpers
-// ─────────────────────────────────────────────
- 
+
 static void printResult(const std::string& domain, int cls,
                          const std::vector<double>& conf, bool verbose)
 {
@@ -228,11 +209,7 @@ static void printSeparator()
 {
     std::cout << "─────────────────────────────────────────────\n";
 }
- 
-// ─────────────────────────────────────────────
-//  Batch mode: read CSV (domain per line, or domain,label)
-// ─────────────────────────────────────────────
- 
+
 static void runBatch(const char* csvPath, const Model& m, bool verbose)
 {
     std::ifstream f(csvPath);
@@ -300,10 +277,6 @@ static void runBatch(const char* csvPath, const Model& m, bool verbose)
     std::cout << "\n";
 }
  
-// ─────────────────────────────────────────────
-//  Interactive mode
-// ─────────────────────────────────────────────
- 
 static void runInteractive(const Model& m)
 {
     std::cout << "\n";
@@ -356,11 +329,7 @@ static void runInteractive(const Model& m)
  
     std::cout << "\nGoodbye!\n";
 }
- 
-// ─────────────────────────────────────────────
-//  Help
-// ─────────────────────────────────────────────
- 
+
 static void printHelp(const char* prog)
 {
     std::cout << "\n";
@@ -383,11 +352,7 @@ static void printHelp(const char* prog)
         std::cout << "  [" << i << "] " << CLASS_NAMES[i] << " — " << CLASS_DESC[i] << "\n";
     std::cout << "\n";
 }
- 
-// ─────────────────────────────────────────────
-//  main
-// ─────────────────────────────────────────────
- 
+
 int main(int argc, char* argv[])
 {
     const char* modelPath = "best_model.bin";

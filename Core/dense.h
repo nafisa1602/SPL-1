@@ -3,6 +3,7 @@
 
 namespace dense
 {
+
 struct denseLayer
 {
     int inputSize;
@@ -10,13 +11,10 @@ struct denseLayer
     double* weight;
     double* bias;
     double* inputCache;
-
     denseLayer(int input, int output);
     ~denseLayer();
-
     void forward(const double* input, double* output);
     void backward(const double* denseOutput, double* denseInput, double learningRate);
-
     double* getWeights() { return weight; }
     double* getBias() { return bias; }
 };

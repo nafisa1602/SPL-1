@@ -1,12 +1,3 @@
-"""
-LSTM DNS Threat Classifier - PyTorch Reference Implementation
-SPL-1 Project | Nafisa Usrat | BSSE 1602
-Institute of Information Technology, University of Dhaka
-
-Purpose: Compare against custom C++ LSTM implementation.
-Architecture mirrors the C++ model as closely as possible.
-"""
-
 import torch
 import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
