@@ -4,13 +4,10 @@ from torch.utils.data import Dataset, DataLoader
 from torch.nn.utils.rnn import pack_padded_sequence
 import pandas as pd
 import numpy as np
-from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.metrics import confusion_matrix
 import time
 import random
 
-# ─────────────────────────────────────────────────────────────────────────────
-# CONFIG  (mirrors configure.h in C++ project)
-# ─────────────────────────────────────────────────────────────────────────────
 TRAIN_PATH = "/home/nafisa/Documents/SPL-1 Project Draft/Datasets/merged/train.csv"
 TEST_PATH  = "/home/nafisa/Documents/SPL-1 Project Draft/Datasets/merged/test.csv"
 
@@ -42,9 +39,7 @@ if torch.cuda.is_available():
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
 
-# ─────────────────────────────────────────────────────────────────────────────
-# ENCODING  (mirrors PreProcessing pipeline)
-# ─────────────────────────────────────────────────────────────────────────────
+
 def char_to_index(c: str) -> int:
     if 'a' <= c <= 'z': return ord(c) - ord('a') + 1
     if '0' <= c <= '9': return ord(c) - ord('0') + 27
@@ -73,9 +68,6 @@ def encode_domain(domain: str) -> list[int]:
     indices += [0] * (MAX_LEN - len(indices))
     return indices
 
-# ─────────────────────────────────────────────────────────────────────────────
-# DATASET
-# ─────────────────────────────────────────────────────────────────────────────
 class DNSDataset(Dataset):
     def __init__(self, path: str):
         print(f"[*] Loading {path} ...")
@@ -108,9 +100,6 @@ class DNSDataset(Dataset):
     def __getitem__(self, idx):
         return self.X[idx], self.y[idx]
 
-# ─────────────────────────────────────────────────────────────────────────────
-# MODEL  (mirrors C++ architecture)
-# ─────────────────────────────────────────────────────────────────────────────
 class LSTMClassifier(nn.Module):
     def __init__(self):
         super().__init__()
@@ -156,9 +145,7 @@ class LSTMClassifier(nn.Module):
         out = self.dropout(hn.squeeze(0))        # (B, H)
         return self.classifier(out)              # (B, NUM_CLASSES)
 
-# ─────────────────────────────────────────────────────────────────────────────
-# TRAINING
-# ─────────────────────────────────────────────────────────────────────────────
+
 def train():
     train_ds = DNSDataset(TRAIN_PATH)
     test_ds  = DNSDataset(TEST_PATH)
@@ -276,13 +263,6 @@ def evaluate(model, loader, verbose=False):
 
     if verbose:
         print(f"\nOverall Accuracy: {acc:.4f} ({acc*100:.2f}%)\n")
-        print("Per-class Performance:")
-        print(classification_report(
-            all_labels, all_preds,
-            target_names=CLASS_NAMES,
-            digits=4,
-            zero_division=0
-        ))
         print("\nConfusion Matrix:")
         cm = confusion_matrix(all_labels, all_preds)
         header = f"{'':12s}" + "".join(f"{n:>12s}" for n in CLASS_NAMES)

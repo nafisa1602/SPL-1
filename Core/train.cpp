@@ -162,7 +162,7 @@ int main()
     double* best_igB = new double[hiddenSize];
     double* best_ogB = new double[hiddenSize];
     double* best_cB  = new double[hiddenSize];
-    double lstmStddev = advanced_math::squareRoot(2.0 / (double)(inputSize + hiddenSize));
+    double lstmStddev = advanced_math::squareRoot(2.0 / (double)(inputSize + hiddenSize));//initialize
     for (int i = 0; i < hiddenSize * concatSize; i++) 
     {
         forgetGateWeight[i] = rng::uniform(-lstmStddev, lstmStddev);
@@ -213,7 +213,7 @@ int main()
             int Teff = lastNonZeroIndex(X_train[n]) + 1;
             // Reset state array before each sample; stale gate values from
             // the previous sample corrupt both forward activations and BPTT
-            for (int tt = 0; tt < Teff; tt++) 
+            for (int tt = 0; tt < Teff; tt++) //state reset
             {
                 vector_math::vectorFill(state[tt].hidden,    hiddenSize, 0.0);
                 vector_math::vectorFill(state[tt].cell,      hiddenSize, 0.0);
@@ -223,7 +223,7 @@ int main()
                 vector_math::vectorFill(state[tt].candidate, hiddenSize, 0.0);
                 vector_math::vectorFill(state[tt].concat,    concatSize, 0.0);
             }
-            for (int tt = 0; tt < Teff; tt++) 
+            for (int tt = 0; tt < Teff; tt++) //forward pass
             {
                 vector_math::vectorFill(x.data(), inputSize, 0.0);
                 int idx = X_train[n][tt];
@@ -245,7 +245,7 @@ int main()
             classifier.forward(hiddenDropped.data(), logits.data());
             int y = y_train[n];
             if (y < 0 || y >= numClasses) continue;
-            double loss = cross_entropy::categoricalCrossEntropyFromLogits_OneHotY(y, logits.data(), logProbs.data(), numClasses);
+            double loss = cross_entropy::categoricalCrossEntropyFromLogits_OneHotY(y, logits.data(), logProbs.data(), numClasses);//loss
             if (loss != loss || loss > 1e6) 
             {
                 std::cout << "[WARNING] Loss explosion detected at epoch " << epoch << ", step " << step << ", class " << y << ", loss=" << loss << ", logits=[";
